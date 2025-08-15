@@ -1,0 +1,173 @@
+{% extends '_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0 rounded">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h4 class="fw-bold">Create your account</h4>
+                        <p class="text-muted">Join Bodegaa to get started</p>
+                    </div>
+
+                    <form method="POST" action="{% url 'register' %}">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
+                                <input type="text" class="form-control" id="username" name="username"
+                                    placeholder="Enter your username">
+                            </div>
+                            {% if messages %}
+                            {% for message in messages %}
+                            {% if 'Username already exists' in message.message %}
+                            <div class="text-danger small mt-2">{{ message }}</div>
+                            {% endif %}
+                            {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-envelope"></i></span>
+                                <input type="email" class="form-control" id="email" name="email"
+                                    placeholder="Enter your email">
+                            </div>
+                            {% if messages %}
+                            {% for message in messages %}
+                            {% if 'Email already registered' in message.message %}
+                            <div class="text-danger small mt-2">{{ message }}</div>
+                            {% endif %}
+                            {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-lock"></i></span>
+                                <input type="password" class="form-control" id="password" name="password"
+                                    placeholder="Create password">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <div class="password-strength mt-2">
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <small class="text-muted">Minimum 8 characters with at least one number</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="confirmPassword" class="form-label">Confirm Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-lock"></i></span>
+                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
+                                    placeholder="Confirm password">
+                                <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+
+                            {% if messages %}
+                            {% for message in messages %}
+                            {% if 'Passwords do not match' in message.message %}
+                            <div class="text-danger small mt-2">{{ message }}</div>
+                            {% endif %}
+                            {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" id="termsCheck" name="termsCheck">
+                            <label class="form-check-label small text-muted" for="termsCheck">
+                                I agree to Bodegaa's <a href="#" class="text-decoration-none text-success">Terms of
+                                    Service</a> and <a href="#" class="text-decoration-none text-success">Privacy
+                                    Policy</a>
+                            </label>
+                            {% if messages %}
+                            {% for message in messages %}
+                            {% if 'terms and conditions' in message.message %}
+                            <div class="text-danger small mt-1">{{ message }}</div>
+                            {% endif %}
+                            {% endfor %}
+                            {% endif %}
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-lg py-3 px-4 text-uppercase w-100">Create
+                            Account</button>
+
+                        <div class="text-center mt-4">
+                            <p class="text-muted">Already have an account? <a href="login.html"
+                                    class="text-decoration-none text-success fw-bold">Sign in</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Toggle password visibility
+    document.getElementById('togglePassword').addEventListener('click', function () {
+        const password = document.getElementById('password');
+        const icon = this.querySelector('i');
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        icon.classList.toggle('bi-eye');
+        icon.classList.toggle('bi-eye-slash');
+    });
+
+    // Toggle confirm password visibility
+    document.getElementById('toggleConfirmPassword').addEventListener('click', function () {
+        const confirmPassword = document.getElementById('confirmPassword');
+        const icon = this.querySelector('i');
+        const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+        confirmPassword.setAttribute('type', type);
+        icon.classList.toggle('bi-eye');
+        icon.classList.toggle('bi-eye-slash');
+    });
+
+    // Password strength indicator
+    document.getElementById('password').addEventListener('input', function () {
+        const strengthBar = document.querySelector('.progress-bar');
+        const strength = calculatePasswordStrength(this.value);
+        strengthBar.style.width = strength + '%';
+
+        // Update color based on strength
+        strengthBar.className = 'progress-bar'; // Reset classes
+        if (strength < 30) {
+            strengthBar.classList.add('bg-danger');
+        } else if (strength < 70) {
+            strengthBar.classList.add('bg-warning');
+        } else {
+            strengthBar.classList.add('bg-success');
+        }
+    });
+
+    function calculatePasswordStrength(password) {
+        let strength = 0;
+
+        // Length check
+        if (password.length > 0) strength += 10;
+        if (password.length >= 8) strength += 30;
+
+        // Complexity checks
+        if (/[A-Z]/.test(password)) strength += 20;
+        if (/[0-9]/.test(password)) strength += 20;
+        if (/[^A-Za-z0-9]/.test(password)) strength += 20;
+
+        return Math.min(strength, 100); // Cap at 100%
+    }
+</script>
+{% endblock %}
