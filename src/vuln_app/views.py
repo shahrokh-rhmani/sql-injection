@@ -89,3 +89,8 @@ def listview(request):
          
     }
     return render(request, 'listview.html', context)
+
+
+def logout(request):
+    request.session.flush()  
+    return redirect('home') 
