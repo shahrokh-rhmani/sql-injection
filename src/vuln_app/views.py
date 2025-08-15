@@ -1,6 +1,7 @@
-from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
+from django.db import connection
+from django.shortcuts import redirect, render
 
 
 def _render_register_form(request, username='', email='', **kwargs):
@@ -62,6 +63,25 @@ def register(request):
             return _render_register_form(request, username, email)
 
     return _render_register_form(request)
+
+def login(request):
+    error = None  
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM auth_user  WHERE username='{username}' AND password='{password}'")
+            user = cursor.fetchone()
+
+            if user:
+                request.session['user_id'] = user[0]
+                request.session['username'] = user[4]
+                return redirect('home')
+            else:
+                error = "Invalid username or password"
+
+    return render(request, 'accounts/login.html', {'error': error})
 
 
 def listview(request):
