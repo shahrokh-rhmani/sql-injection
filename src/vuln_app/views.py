@@ -1,3 +1,7 @@
 from django.shortcuts import render
 
-# Create your views here.
+def listview(request):
+    context = {
+         
+    }
+    return render(request, 'listview.html', context)
